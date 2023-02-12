@@ -10,7 +10,7 @@ app.use(express.static('public')); //redirect users connecting to ip to public f
 //openai stuff
 const { Configuration, OpenAIApi } = require("openai");
 const configuration = new Configuration({
-  apiKey: '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',
+  apiKey: 'APIKEY',
 });
 const openai = new OpenAIApi(configuration);
 
