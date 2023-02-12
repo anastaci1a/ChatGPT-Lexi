@@ -10,7 +10,7 @@ app.use(express.static('public')); //redirect users connecting to ip to public f
 //openai stuff
 const { Configuration, OpenAIApi } = require("openai");
 const configuration = new Configuration({
-  apiKey: 'APIKEY',
+  apiKey: 'API Key',
 });
 const openai = new OpenAIApi(configuration);
 
@@ -72,6 +72,7 @@ async function askAI() {
      stop: ["User:"]
   });
   let r = response.data.choices[0].text;
+  conversation += r;
   sendMessage("AI", "Lexi: " + r);
 }
 
