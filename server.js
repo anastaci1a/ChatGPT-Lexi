@@ -6,6 +6,17 @@ let express = require('express');
 let app = express();
 let server = app.listen(process.env.PORT || 3000);
 app.use(express.static('public')); //redirect users connecting to ip to public folder
+
+//openai stuff
+const { Configuration, OpenAIApi } = require("openai");
+const configuration = new Configuration({
+  apiKey: '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',
+});
+const openai = new OpenAIApi(configuration);
+
+//Initialize conversation
+let conversation = fs.readFileSync('saves/convo.lx', 'utf8');
+
 //favicon
 app.use('/favicon.ico', express.static('public/data/images/favicon.ico'));
 
@@ -27,12 +38,47 @@ io.sockets.on('connection', function(socket) {
   let joined = false;
   addToConsole('New Connection: ' + socket.id);
   io.to(socket.id).emit('join', socket.id);
+
+  let convo = conversation.substring(0, conversation.length-7).replaceAll("\n", "</p><p>");
+  sendInitialMessage(socket.id, convo);
+
+  socket.on('message', function(msg) {
+    sendMessage(socket.id, "User: " + msg);
+    conversation += "\n\nUser: " + msg + "\n\nLexi: ";
+    askAI();
+  });
 });
+
+function sendMessage(source, msg) {
+  io.sockets.emit('message', msg);
+  addToConsole("<" + source + "> " + msg)
+}
+
+function sendInitialMessage(source, msg) {
+  io.sockets.emit('message', msg);
+  addToConsole("<" + source + "> Initial Message Sent")
+}
+
+
+async function askAI() {
+  let response = await openai.createCompletion({
+     model: "text-davinci-003",
+     prompt: conversation,
+     temperature: 1,
+     max_tokens: 512,
+     top_p: 1,
+     frequency_penalty: 0.0,
+     presence_penalty: 0.6,
+     stop: ["User:"]
+  });
+  let r = response.data.choices[0].text;
+  sendMessage("AI", "Lexi: " + r);
+}
 
 
 function addToConsole(msg) {
   let time = true;
-  let print = '<' + getTime('fulltime') + '> ' + msg;
+  let print = '<' + getTime('fulltime') + '> ' + msg.replaceAll("\n", " [break] ");
 
   //print & save
   console.log(print);

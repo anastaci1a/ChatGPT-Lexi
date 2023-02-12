@@ -16,12 +16,15 @@ function setup() {
   ellipseMode(CENTER);
   textAlign(CENTER, CENTER);
 
+  setupChat();
   setupInput();
 }
 
 //***
 function draw() {
-
+  backgroundColor = color((frameCount / 2) % 360, 20, 100);
+  // chatlogDiv.style('background-color: hsl(' + str(hue(backgroundColor)) + ', ' + str(0.8*saturation(backgroundColor)) + ', ' + str(0.8*brightness(backgroundColor)));
+  drawBackground();
 
   //input
   mouse.update();
